@@ -1,9 +1,6 @@
 ---
 applyTo: '**'
 ---
----
-applyTo: '**'
----
 Good Morning,
 Thank you for your interest in working with Horizon Sphere Equity. As part of our hiring process, we invite you to complete a 24-hour developer challenge designed to evaluate your skills in building real-world applications.
 
@@ -55,6 +52,10 @@ Horizon Sphere Equity
 
 ---
 # Developing flow
+## IMPORTANT NOTE: We are running on Windows using Docker with NO WSL, using Laravel Sail. All your docker commands should be run INSIDE the container.
+``` bash
+docker exec -it <name_of_the_container> <command>
+```
 0. Create a TASKS.md file with a list of tasks to be done.
 1. Create a Docker environment for your application.
 2. Use this git repository to track your changes [https://github.com/marcellopato/horizon.git]

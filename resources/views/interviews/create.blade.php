@@ -1,82 +1,80 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>Create New Interview</h4>
-                        <a href="{{ route('interviews.index') }}" class="btn btn-secondary">
-                            Back to Interviews
-                        </a>
-                    </div>
-                </div>
+<div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h4 class="text-xl font-semibold text-gray-800">Create New Interview</h4>
+                <a href="{{ route('interviews.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Back to Interviews
+                </a>
+            </div>
+        </div>
 
-                <div class="card-body">
+        <div class="p-6">
                     <form method="POST" action="{{ route('interviews.store') }}" id="interview-form">
                         @csrf
 
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Interview Title <span class="text-danger">*</span></label>
+                        <div class="mb-6">
+                            <label for="title" class="block text-sm font-medium text-gray-700">Interview Title <span class="text-red-500">*</span></label>
                             <input type="text" 
-                                   class="form-control @error('title') is-invalid @enderror" 
+                                   class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('title') border-red-500 @else border-gray-300 @enderror" 
                                    id="title" 
                                    name="title" 
                                    value="{{ old('title') }}" 
                                    required>
                             @error('title')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" 
+                        <div class="mb-6">
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+                            <textarea class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('description') border-red-500 @else border-gray-300 @enderror" 
                                       id="description" 
                                       name="description" 
                                       rows="3" 
                                       required>{{ old('description') }}</textarea>
                             @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="time_limit" class="form-label">Interview Time Limit (minutes)</label>
+                        <div class="mb-6">
+                            <label for="time_limit" class="block text-sm font-medium text-gray-700">Interview Time Limit (minutes)</label>
                             <input type="number" 
-                                   class="form-control @error('time_limit') is-invalid @enderror" 
+                                   class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('time_limit') border-red-500 @else border-gray-300 @enderror" 
                                    id="time_limit" 
                                    name="time_limit" 
                                    value="{{ old('time_limit') }}" 
                                    min="1">
-                            <div class="form-text">Leave empty for no time limit</div>
+                            <p class="mt-1 text-sm text-gray-500">Leave empty for no time limit</p>
                             @error('time_limit')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" 
+                        <div class="mb-6">
+                            <div class="flex items-center">
+                                <input class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
                                        type="checkbox" 
                                        name="is_active" 
                                        id="is_active" 
                                        value="1" 
                                        {{ old('is_active', true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_active">
+                                <label class="ml-2 block text-sm text-gray-900" for="is_active">
                                     Active Interview
                                 </label>
                             </div>
                         </div>
 
-                        <hr>
+                        <div class="border-t border-gray-200 pt-6 mt-6">
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5>Questions <span class="text-danger">*</span></h5>
-                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-question">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h5 class="text-lg font-medium text-gray-900">Questions <span class="text-red-500">*</span></h5>
+                                <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" id="add-question">
                                     Add Question
                                 </button>
                             </div>
@@ -84,59 +82,59 @@
                             <div id="questions-container">
                                 @if(old('questions'))
                                     @foreach(old('questions') as $index => $question)
-                                        <div class="question-item border rounded p-3 mb-3">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <h6>Question {{ $index + 1 }}</h6>
-                                                <button type="button" class="btn btn-outline-danger btn-sm remove-question">
+                                        <div class="question-item border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <h6 class="text-lg font-medium text-gray-900">Question {{ $index + 1 }}</h6>
+                                                <button type="button" class="text-red-600 hover:text-red-900 px-3 py-1 border border-red-600 rounded text-sm hover:bg-red-50 remove-question">
                                                     Remove
                                                 </button>
                                             </div>
                                             
-                                            <div class="mb-2">
-                                                <label class="form-label">Question Text <span class="text-danger">*</span></label>
-                                                <textarea class="form-control @error('questions.' . $index . '.question') is-invalid @enderror" 
+                                            <div class="mb-3">
+                                                <label class="block text-sm font-medium text-gray-700">Question Text <span class="text-red-500">*</span></label>
+                                                <textarea class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('questions.' . $index . '.question') border-red-500 @else border-gray-300 @enderror" 
                                                           name="questions[{{ $index }}][question]" 
                                                           rows="2" 
                                                           required>{{ $question['question'] ?? '' }}</textarea>
                                                 @error('questions.' . $index . '.question')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
                                             
                                             <div class="mb-0">
-                                                <label class="form-label">Time Limit (minutes)</label>
+                                                <label class="block text-sm font-medium text-gray-700">Time Limit (minutes)</label>
                                                 <input type="number" 
-                                                       class="form-control @error('questions.' . $index . '.time_limit') is-invalid @enderror" 
+                                                       class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('questions.' . $index . '.time_limit') border-red-500 @else border-gray-300 @enderror" 
                                                        name="questions[{{ $index }}][time_limit]" 
                                                        value="{{ $question['time_limit'] ?? '' }}" 
                                                        min="1">
                                                 @error('questions.' . $index . '.time_limit')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
                                         </div>
                                     @endforeach
                                 @else
-                                    <div class="question-item border rounded p-3 mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6>Question 1</h6>
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-question">
+                                    <div class="question-item border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h6 class="text-lg font-medium text-gray-900">Question 1</h6>
+                                            <button type="button" class="text-red-600 hover:text-red-900 px-3 py-1 border border-red-600 rounded text-sm hover:bg-red-50 remove-question">
                                                 Remove
                                             </button>
                                         </div>
                                         
-                                        <div class="mb-2">
-                                            <label class="form-label">Question Text <span class="text-danger">*</span></label>
-                                            <textarea class="form-control" 
+                                        <div class="mb-3">
+                                            <label class="block text-sm font-medium text-gray-700">Question Text <span class="text-red-500">*</span></label>
+                                            <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
                                                       name="questions[0][question]" 
                                                       rows="2" 
                                                       required></textarea>
                                         </div>
                                         
                                         <div class="mb-0">
-                                            <label class="form-label">Time Limit (minutes)</label>
+                                            <label class="block text-sm font-medium text-gray-700">Time Limit (minutes)</label>
                                             <input type="number" 
-                                                   class="form-control" 
+                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
                                                    name="questions[0][time_limit]" 
                                                    min="1">
                                         </div>
@@ -145,19 +143,18 @@
                             </div>
 
                             @error('questions')
-                                <div class="text-danger">{{ $message }}</div>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="flex justify-end space-x-3 pt-6">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
                                 Create Interview
                             </button>
                         </div>
+                        </div>
                     </form>
                 </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -168,27 +165,27 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('add-question').addEventListener('click', function() {
         const container = document.getElementById('questions-container');
         const questionItem = document.createElement('div');
-        questionItem.className = 'question-item border rounded p-3 mb-3';
+        questionItem.className = 'question-item border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50';
         questionItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6>Question ${questionIndex + 1}</h6>
-                <button type="button" class="btn btn-outline-danger btn-sm remove-question">
+            <div class="flex justify-between items-center mb-3">
+                <h6 class="text-lg font-medium text-gray-900">Question ${questionIndex + 1}</h6>
+                <button type="button" class="text-red-600 hover:text-red-900 px-3 py-1 border border-red-600 rounded text-sm hover:bg-red-50 remove-question">
                     Remove
                 </button>
             </div>
             
-            <div class="mb-2">
-                <label class="form-label">Question Text <span class="text-danger">*</span></label>
-                <textarea class="form-control" 
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700">Question Text <span class="text-red-500">*</span></label>
+                <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
                           name="questions[${questionIndex}][question]" 
                           rows="2" 
                           required></textarea>
             </div>
             
             <div class="mb-0">
-                <label class="form-label">Time Limit (minutes)</label>
+                <label class="block text-sm font-medium text-gray-700">Time Limit (minutes)</label>
                 <input type="number" 
-                       class="form-control" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
                        name="questions[${questionIndex}][time_limit]" 
                        min="1">
             </div>
@@ -213,7 +210,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateQuestionNumbers() {
         const questions = document.querySelectorAll('.question-item');
         questions.forEach((question, index) => {
-            question.querySelector('h6').textContent = `Question ${index + 1}`;
+            const h6 = question.querySelector('h6');
+            if (h6) {
+                h6.textContent = `Question ${index + 1}`;
+            }
         });
     }
 });

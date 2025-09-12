@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('interviews.index')" :active="request()->routeIs('interviews.*')">
                         {{ __('Interviews') }}
                     </x-nav-link>
+                    @if(auth()->user()->canManageInterviews())
+                        <x-nav-link :href="route('submissions.index')" :active="request()->routeIs('submissions.*')">
+                            {{ __('Submissions') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 

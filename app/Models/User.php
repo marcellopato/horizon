@@ -86,4 +86,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Interview::class, 'created_by');
     }
+
+    /**
+     * Get submissions by this user
+     */
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

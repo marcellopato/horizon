@@ -9,21 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class InterviewController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('manage-interviews')->except(['index', 'show']);
-    }
-
     /**
      * Display a listing of the interviews.
      */
     public function index()
     {
         $interviews = Interview::with(['creator', 'questions'])
-            ->when(Auth::user()->isCandidate(), function ($query) {
-                $query->where('is_active', true);
-            })
             ->latest()
             ->paginate(10);
 
