@@ -37,6 +37,14 @@ class Interview extends Model
     }
 
     /**
+     * Get all submissions for this interview
+     */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
+    }
+
+    /**
      * Scope to get only active interviews
      */
     public function scopeActive($query)

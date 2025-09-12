@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Create admin and sample users for testing
         $this->call([
             AdminUserSeeder::class,
+            InterviewSeeder::class,
         ]);
     }
 }
