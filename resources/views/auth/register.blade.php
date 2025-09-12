@@ -46,8 +46,8 @@
                 <option value="">{{ __('Select your role') }}</option>
                 <option value="candidate" {{ old('role') == 'candidate' ? 'selected' : '' }}>{{ __('Candidate') }}</option>
                 <option value="reviewer" {{ old('role') == 'reviewer' ? 'selected' : '' }}>{{ __('Reviewer') }}</option>
-                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
             </select>
+            <p class="mt-1 text-sm text-gray-600">{{ __('Note: Admin accounts are created by system administrators.') }}</p>
             <x-input-error :messages="$errors->get('role')" class="mt-2" />
         </div>
 
