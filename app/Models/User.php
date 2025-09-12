@@ -78,4 +78,12 @@ class User extends Authenticatable
     {
         return in_array($this->role, ['admin', 'reviewer']);
     }
+
+    /**
+     * Get interviews created by this user
+     */
+    public function createdInterviews()
+    {
+        return $this->hasMany(Interview::class, 'created_by');
+    }
 }
