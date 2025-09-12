@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'manage-interviews' => \App\Http\Middleware\CanManageInterviews::class,
+            'candidate-only' => \App\Http\Middleware\EnsureCandidate::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

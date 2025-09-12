@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -44,5 +45,37 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if user has admin role
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user has reviewer role
+     */
+    public function isReviewer(): bool
+    {
+        return $this->role === 'reviewer';
+    }
+
+    /**
+     * Check if user has candidate role
+     */
+    public function isCandidate(): bool
+    {
+        return $this->role === 'candidate';
+    }
+
+    /**
+     * Check if user can manage interviews (admin or reviewer)
+     */
+    public function canManageInterviews(): bool
+    {
+        return in_array($this->role, ['admin', 'reviewer']);
     }
 }
