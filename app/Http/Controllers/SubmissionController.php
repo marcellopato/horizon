@@ -9,11 +9,20 @@ use App\Models\SubmissionAnswer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use ZipArchive;
 
+/**
+ * Controller handling candidate submissions and reviewer actions.
+ */
 class SubmissionController extends Controller
 {
     /**
      * Start an interview for a candidate.
+    *
+    * @param Interview $interview Interview to start
+    *
+    * @return \Illuminate\Http\RedirectResponse
      */
     public function start(Interview $interview)
     {
@@ -22,17 +31,20 @@ class SubmissionController extends Controller
                 ->with('error', 'This interview is not currently available.');
         }
 
-        $submission = Submission::firstOrCreate([
-            'user_id' => Auth::id(),
-            'interview_id' => $interview->id,
-        ], [
-            'status' => 'in_progress',
-            'started_at' => now(),
-            'metadata' => [
-                'user_agent' => request()->userAgent(),
-                'ip_address' => request()->ip(),
+        $submission = Submission::firstOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'interview_id' => $interview->id,
             ],
-        ]);
+            [
+                'status' => 'in_progress',
+                'started_at' => now(),
+                'metadata' => [
+                    'user_agent' => request()->userAgent(),
+                    'ip_address' => request()->ip(),
+                ],
+            ]
+        );
 
         return redirect()->route('submissions.interview', $submission);
     }
@@ -53,15 +65,21 @@ class SubmissionController extends Controller
 
     /**
      * Upload video answer for a question.
+     *
+     * @param Request $request HTTP request
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function uploadVideo(Request $request)
     {
-        $request->validate([
-            'submission_id' => 'required|exists:submissions,id',
-            'question_id' => 'required|exists:questions,id',
-            'video' => 'required|file|mimes:mp4,webm,mov|max:50000', // 50MB max
-            'duration' => 'required|integer|min:1',
-        ]);
+        $request->validate(
+            [
+                'submission_id' => 'required|exists:submissions,id',
+                'question_id' => 'required|exists:questions,id',
+                'video' => 'required|file|mimes:mp4,webm,mov|max:50000', // 50MB max
+                'duration' => 'required|integer|min:1',
+            ]
+        );
 
         $submission = Submission::findOrFail($request->submission_id);
         
@@ -74,31 +92,41 @@ class SubmissionController extends Controller
             'public'
         );
 
-        $answer = SubmissionAnswer::updateOrCreate([
-            'submission_id' => $submission->id,
-            'question_id' => $request->question_id,
-        ], [
-            'video_path' => $videoPath,
-            'recording_duration' => $request->duration,
-            'status' => 'completed',
-            'completed_at' => now(),
-            'attempts' => $request->input('attempts', 1),
-            'metadata' => [
-                'file_size' => $request->file('video')->getSize(),
-                'mime_type' => $request->file('video')->getMimeType(),
-                'uploaded_at' => now()->toISOString(),
+        $answer = SubmissionAnswer::updateOrCreate(
+            [
+                'submission_id' => $submission->id,
+                'question_id' => $request->question_id,
             ],
-        ]);
+            [
+                'video_path' => $videoPath,
+                'recording_duration' => $request->duration,
+                'status' => 'completed',
+                'completed_at' => now(),
+                'attempts' => $request->input('attempts', 1),
+                'metadata' => [
+                    'file_size' => $request->file('video')->getSize(),
+                    'mime_type' => $request->file('video')->getMimeType(),
+                    'uploaded_at' => now()->toISOString(),
+                ],
+            ]
+        );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Video uploaded successfully',
-            'answer' => $answer,
-        ]);
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'Video uploaded successfully',
+                'answer' => $answer,
+            ]
+        );
     }
 
     /**
      * Mark submission as completed by the candidate.
+     *
+     * @param Submission $submission Submission
+     * @param Request    $request    HTTP request
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function submit(Submission $submission, Request $request)
     {
@@ -133,6 +161,8 @@ class SubmissionController extends Controller
 
     /**
      * Display a listing of submissions for admin/reviewers.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
@@ -145,6 +175,10 @@ class SubmissionController extends Controller
 
     /**
      * Show the review page for a submission.
+     *
+     * @param Submission $submission Submission entity
+     *
+     * @return \Illuminate\View\View
      */
     public function review(Submission $submission)
     {
@@ -153,9 +187,6 @@ class SubmissionController extends Controller
         return view('submissions.review', compact('submission'));
     }
 
-    /**
-     * Save review for a specific answer.
-     */
     /**
      * Save review for a specific answer.
      *
@@ -200,9 +231,6 @@ class SubmissionController extends Controller
         return back()->with('success', 'Review saved successfully!');
     }
 
-    /**
-     * Save overall review for a submission.
-     */
     /**
      * Save overall review for a submission.
      *
@@ -252,9 +280,6 @@ class SubmissionController extends Controller
 
     /**
      * Remove the specified submission.
-     */
-    /**
-     * Remove the specified submission.
      *
      * @param Submission $submission
      * @return \Illuminate\Http\JsonResponse
@@ -277,5 +302,66 @@ class SubmissionController extends Controller
                 'message' => 'Submission deleted successfully',
             ]
         );
+    }
+
+    /**
+     * Download all answer videos for a submission as a ZIP file.
+     *
+     * @param Submission $submission Submission
+     *
+     * @return StreamedResponse
+     */
+    public function download(Submission $submission): StreamedResponse
+    {
+        $submission->loadMissing(['user', 'interview', 'answers']);
+
+        $zipFileName = 'submission-' . $submission->id . '-' . now()->format('Ymd_His') . '.zip';
+
+        return response()->streamDownload(function () use ($submission) {
+            $zip = new ZipArchive();
+            $tmp = tempnam(sys_get_temp_dir(), 'zip');
+            $zip->open($tmp, ZipArchive::OVERWRITE);
+
+            foreach ($submission->answers as $answer) {
+                if (!$answer->video_path) {
+                    continue;
+                }
+                if (!Storage::disk('public')->exists($answer->video_path)) {
+                    continue;
+                }
+                $stream = Storage::disk('public')->readStream($answer->video_path);
+                if ($stream === false) {
+                    continue;
+                }
+                $basename = basename($answer->video_path);
+                $zip->addFromString($basename, stream_get_contents($stream));
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }
+
+            $zip->close();
+            readfile($tmp);
+            @unlink($tmp);
+        }, $zipFileName, [
+            'Content-Type' => 'application/zip',
+        ]);
+    }
+
+    /**
+     * Download a single answer video file.
+     *
+     * @param SubmissionAnswer $answer Answer entity
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function downloadAnswer(SubmissionAnswer $answer)
+    {
+        if (!$answer->video_path || !Storage::disk('public')->exists($answer->video_path)) {
+            abort(404);
+        }
+
+        $path = Storage::disk('public')->path($answer->video_path);
+        return response()->download($path, basename($answer->video_path));
     }
 }
