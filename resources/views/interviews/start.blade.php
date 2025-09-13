@@ -233,7 +233,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         checkReadiness();
     } catch (error) {
-        console.log('Auto-check failed, manual check required');
+        console.warn('Auto-check failed:', error?.name, error?.message);
+        // Mantém o manual check, mas dá uma mensagem útil se for permissão negada
+        if (error && (error.name === 'NotAllowedError' || error.name === 'SecurityError')) {
+            alert('O navegador bloqueou o acesso à câmera/microfone. Clique no ícone de cadeado na barra de endereços e permita o acesso.');
+        }
     }
 });
 
@@ -243,6 +247,16 @@ window.addEventListener('beforeunload', () => {
         testStream.getTracks().forEach(track => track.stop());
     }
 });
+
+// Para evitar manter a câmera aberta ao iniciar a entrevista
+const startForm = document.querySelector('form[action="{{ route('submissions.start', $interview) }}"]');
+if (startForm) {
+    startForm.addEventListener('submit', () => {
+        if (testStream) {
+            try { testStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+        }
+    });
+}
 </script>
 
 <style>

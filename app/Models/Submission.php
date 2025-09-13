@@ -49,7 +49,7 @@ class Submission extends Model
 
     public function isCompleted(): bool
     {
-        return $this->status === 'completed' || $this->status === 'submitted';
+        return in_array($this->status, ['completed', 'submitted', 'reviewed'], true);
     }
 
     public function isInProgress(): bool
