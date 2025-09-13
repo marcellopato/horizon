@@ -32,6 +32,7 @@ class CreateAdminUser extends Command
         // Check if user already exists
         if (\App\Models\User::where('email', $email)->exists()) {
             $this->error("User with email {$email} already exists!");
+
             return 1;
         }
 
@@ -44,7 +45,7 @@ class CreateAdminUser extends Command
             'email_verified_at' => now(),
         ]);
 
-        $this->info("Admin user created successfully!");
+        $this->info('Admin user created successfully!');
         $this->info("Name: {$user->name}");
         $this->info("Email: {$user->email}");
         $this->info("Role: {$user->role}");

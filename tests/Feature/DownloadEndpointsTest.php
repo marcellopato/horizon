@@ -53,7 +53,7 @@ class DownloadEndpointsTest extends TestCase
         return compact('reviewer', 'candidate', 'submission', 'answer');
     }
 
-    public function testReviewerCanDownloadSubmissionZip(): void
+    public function test_reviewer_can_download_submission_zip(): void
     {
         $data = $this->seedSubmissionWithVideo();
         $reviewer = $data['reviewer'];
@@ -65,7 +65,7 @@ class DownloadEndpointsTest extends TestCase
             ->assertHeader('content-type', 'application/zip');
     }
 
-    public function testReviewerCanDownloadSingleAnswer(): void
+    public function test_reviewer_can_download_single_answer(): void
     {
         $data = $this->seedSubmissionWithVideo();
         $reviewer = $data['reviewer'];
@@ -76,7 +76,7 @@ class DownloadEndpointsTest extends TestCase
             ->assertOk();
     }
 
-    public function testCandidateCannotDownload(): void
+    public function test_candidate_cannot_download(): void
     {
         $data = $this->seedSubmissionWithVideo();
         $candidate = $data['candidate'];
@@ -92,7 +92,7 @@ class DownloadEndpointsTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testGuestIsRedirectedToLogin(): void
+    public function test_guest_is_redirected_to_login(): void
     {
         $data = $this->seedSubmissionWithVideo();
         $submission = $data['submission'];

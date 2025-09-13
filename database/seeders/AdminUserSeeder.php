@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
@@ -15,7 +14,7 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         // Create default admin user if it doesn't exist
-        if (!User::where('email', 'admin@horizon.test')->exists()) {
+        if (! User::where('email', 'admin@horizon.test')->exists()) {
             User::create([
                 'name' => 'System Admin',
                 'email' => 'admin@horizon.test',
@@ -26,7 +25,7 @@ class AdminUserSeeder extends Seeder
         }
 
         // Create sample reviewer user for testing
-        if (!User::where('email', 'reviewer@horizon.test')->exists()) {
+        if (! User::where('email', 'reviewer@horizon.test')->exists()) {
             User::create([
                 'name' => 'Sample Reviewer',
                 'email' => 'reviewer@horizon.test',
@@ -37,7 +36,7 @@ class AdminUserSeeder extends Seeder
         }
 
         // Create sample candidate user for testing
-        if (!User::where('email', 'candidate@horizon.test')->exists()) {
+        if (! User::where('email', 'candidate@horizon.test')->exists()) {
             User::create([
                 'name' => 'Sample Candidate',
                 'email' => 'candidate@horizon.test',

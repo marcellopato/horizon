@@ -15,7 +15,7 @@ All core features have been successfully implemented and tested:
 
 ## 🏗️ Technology Stack
 
-- **Backend:** Laravel 11.x with PHP 8.4
+- **Backend:** Laravel 12.x with PHP 8.4
 - **Frontend:** TailwindCSS v4 with Vite HMR
 - **Database:** MySQL 8.0
 - **Development:** Docker via Laravel Sail
@@ -33,7 +33,11 @@ All core features have been successfully implemented and tested:
 - ✅ Add scores and comments to candidate responses
 - ✅ Complete CRUD operations for interviews and questions
 
+- ✅ Download candidate submissions (ZIP all answers or single video)
+
+
 #### For Candidates
+
 - ✅ Browse and view available interviews
 - ✅ System checks (camera/microphone permissions)
 - ✅ Record video responses using WebRTC
@@ -41,7 +45,9 @@ All core features have been successfully implemented and tested:
 - ✅ Automatic video upload and submission
 - ✅ Real-time recording controls (start/stop/restart)
 
+
 ### 🔐 Authentication & Security
+
 - **Role-based access control** with 3 user types:
   - **Admin:** Full system management
   - **Reviewer:** Interview creation and candidate evaluation  
@@ -50,7 +56,9 @@ All core features have been successfully implemented and tested:
 - **Custom middleware** for role-based route protection
 - **Secure file uploads** with validation
 
+
 ### 🎬 Video Recording System
+
 - **WebRTC Integration** for browser-based recording
 - **Real-time camera preview** during recording
 - **Permission handling** for camera/microphone access
@@ -58,26 +66,43 @@ All core features have been successfully implemented and tested:
 - **Automatic file upload** using FormData
 - **Video storage** in Laravel's filesystem
 
+
+### ⬇️ Downloads (Reviewers/Admin)
+
+- Na lista de Submissões, clique em "Download" para baixar um ZIP com todos os vídeos de uma submissão concluída ou revisada.
+- Na tela de Revisão, use o link "Download video" em cada resposta para baixar apenas aquele arquivo.
+- Permissões: rotas protegidas por `can:manage-interviews` (apenas reviewer/admin).
+- Notas:
+   - Se a submissão não contiver vídeos, o ZIP pode ficar vazio (melhoria futura exibirá mensagem).
+   - Tamanho: respeita os limites de upload definidos; para grandes volumes, considere otimizações de streaming/compactação.
+
 ## 📦 Installation & Setup
 
+
 ### Prerequisites
+
 - Docker Desktop
 - Git
 
+
 ### Quick Start
 
+
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/marcellopato/horizon.git
    cd horizon
    ```
 
 2. **Start the development environment:**
+
    ```bash
    docker-compose up -d
    ```
 
 3. **Install dependencies and setup database:**
+
    ```bash
    docker-compose exec laravel.test composer install
    docker-compose exec laravel.test php artisan migrate
@@ -85,13 +110,16 @@ All core features have been successfully implemented and tested:
    ```
 
 4. **Start the development server:**
+
    ```bash
    docker-compose exec laravel.test npm run dev
    ```
 
 5. **Access the application:**
-   - Frontend: http://localhost
-   - Development server: http://localhost:5173
+
+
+   - Frontend: [http://localhost](http://localhost)
+   - Development server: [http://localhost:5173](http://localhost:5173)
 
 ## 👤 Test Accounts
 
@@ -99,9 +127,9 @@ Use these pre-seeded accounts for testing:
 
 | Role | Email | Password | Access Level |
 |------|-------|----------|-------------|
-| **Admin** | admin@horizon.com | password | Full system access |
-| **Reviewer** | reviewer@horizon.com | password | Interview management |
-| **Candidate** | candidate@horizon.com | password | Interview participation |
+| **Admin** | `admin@horizon.test` | admin123 | Full system access |
+| **Reviewer** | `reviewer@horizon.test` | reviewer123 | Interview management |
+| **Candidate** | `candidate@horizon.test` | candidate123 | Interview participation |
 
 ## 🛠️ Development Commands
 
@@ -119,7 +147,7 @@ docker-compose exec laravel.test php artisan db:seed
 
 ## 🧪 PHPUnit
 
-Resultado recente da suíte de testes (ambiente local dentro do container):
+Recent test run output (inside the container):
 
 ```
 # php artisan test
@@ -194,36 +222,36 @@ Resultado recente da suíte de testes (ambiente local dentro do container):
   Duration: 34.58s
 ```
 
-### Como rodar os testes
+### How to run tests
 
-Execute os testes sempre dentro do container (Windows sem WSL):
+Always run tests inside the container (Windows without WSL):
 
 ```bash
 docker-compose exec laravel.test php artisan test
 ```
 
-Rodar apenas os de Feature ou Unit:
+Run only Feature or Unit suites:
 
 ```bash
 docker-compose exec laravel.test php artisan test --testsuite=Feature
 docker-compose exec laravel.test php artisan test --testsuite=Unit
 ```
 
-Executar um arquivo de teste específico:
+Run a specific test file:
 
 ```bash
 docker-compose exec laravel.test php artisan test tests/Feature/SubmissionAndReviewTest.php
 ```
 
-### Notas de ambiente de teste
+### Test environment notes
 
-- Os testes usam SQLite em memória para rapidez (config em `phpunit.xml`).
-- As migrations que dependem de MySQL (ex.: alteração de ENUM) são guardadas para não rodarem no SQLite durante os testes.
-- Uploads de vídeo nos testes usam `Storage::fake('public')` para não escrever no disco real.
+- Tests use in-memory SQLite for speed (see `phpunit.xml`).
+- MySQL-specific migrations (e.g., ENUM changes) are guarded to not run on SQLite during tests.
+- Video uploads in tests use `Storage::fake('public')` to avoid writing to the real disk.
 
-### Badge de CI (opcional)
+### CI Badge (optional)
 
-Se configurar GitHub Actions, você pode adicionar um badge no topo do README:
+If you configure GitHub Actions, you can add a badge at the top of the README:
 
 ```md
 ![tests](https://github.com/marcellopato/horizon/actions/workflows/tests.yml/badge.svg)

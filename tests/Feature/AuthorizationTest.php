@@ -11,9 +11,10 @@ use Tests\TestCase;
  * Feature tests for role-based authorization on routes.
  *
  * @category Tests
- * @package  Feature
+ *
  * @author   Horizon Team <dev@horizon.local>
  * @license  https://opensource.org/licenses/MIT MIT License
+ *
  * @link     https://github.com/marcellopato/horizon
  */
 class AuthorizationTest extends TestCase
@@ -23,9 +24,7 @@ class AuthorizationTest extends TestCase
     /**
      * Helper to create user with a specific role.
      *
-     * @param string $role Role name
-     *
-     * @return User
+     * @param  string  $role  Role name
      */
     protected function createUser(string $role): User
     {
@@ -38,10 +37,8 @@ class AuthorizationTest extends TestCase
 
     /**
      * Guests should be redirected to login on protected pages.
-     *
-     * @return void
      */
-    public function testGuestIsRedirectedToLogin(): void
+    public function test_guest_is_redirected_to_login(): void
     {
         $response = $this->get('/interviews');
         $response->assertRedirect('/login');
@@ -49,10 +46,8 @@ class AuthorizationTest extends TestCase
 
     /**
      * Candidate must receive 403 on manage interview routes.
-     *
-     * @return void
      */
-    public function testCandidateCannotAccessManageRoutes(): void
+    public function test_candidate_cannot_access_manage_routes(): void
     {
         $candidate = $this->createUser('candidate');
         $this->actingAs($candidate);
@@ -72,10 +67,8 @@ class AuthorizationTest extends TestCase
 
     /**
      * Reviewer should access manage routes successfully.
-     *
-     * @return void
      */
-    public function testReviewerCanAccessManageRoutes(): void
+    public function test_reviewer_can_access_manage_routes(): void
     {
         $reviewer = $this->createUser('reviewer');
         $this->actingAs($reviewer);
@@ -98,10 +91,8 @@ class AuthorizationTest extends TestCase
 
     /**
      * Admin should access manage routes successfully.
-     *
-     * @return void
      */
-    public function testAdminCanAccessManageRoutes(): void
+    public function test_admin_can_access_manage_routes(): void
     {
         $admin = $this->createUser('admin');
         $this->actingAs($admin);
@@ -111,10 +102,8 @@ class AuthorizationTest extends TestCase
 
     /**
      * Candidate can browse and start, but not access review area.
-     *
-     * @return void
      */
-    public function testCandidateCanStartAndSubmitButNotReview(): void
+    public function test_candidate_can_start_and_submit_but_not_review(): void
     {
         $reviewer = $this->createUser('reviewer');
         $this->actingAs($reviewer);
@@ -145,7 +134,7 @@ class AuthorizationTest extends TestCase
 
         // candidate can view interviews index and show
         $this->get('/interviews')->assertOk();
-        $this->get('/interviews/' . $interview->id)->assertOk();
+        $this->get('/interviews/'.$interview->id)->assertOk();
 
         // candidate cannot review
         $this->get('/submissions')->assertStatus(403);
