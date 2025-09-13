@@ -15,7 +15,7 @@ class EnsureCandidate
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->isCandidate()) {
+        if (! auth()->check() || ! auth()->user()->isCandidate()) {
             abort(403, 'Access denied. This area is for candidates only.');
         }
 

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Interview;
 use App\Models\Question;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InterviewController extends Controller

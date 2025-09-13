@@ -44,15 +44,16 @@ class SubmissionAnswer extends Model
 
     public function hasVideo(): bool
     {
-        return !empty($this->video_path)
+        return ! empty($this->video_path)
             && Storage::disk('public')->exists($this->video_path);
     }
 
     public function getVideoUrl(): ?string
     {
-        if (!$this->hasVideo()) {
+        if (! $this->hasVideo()) {
             return null;
         }
+
         // Public disk is linked to /storage via storage:link
         return asset('storage/'.ltrim($this->video_path, '/'));
     }
@@ -73,6 +74,7 @@ class SubmissionAnswer extends Model
         if (str_ends_with($path, '.webm')) {
             return 'video/webm';
         }
+
         return 'video/webm';
     }
 
@@ -88,13 +90,13 @@ class SubmissionAnswer extends Model
 
     public function getFormattedDuration(): string
     {
-        if (!$this->recording_duration) {
+        if (! $this->recording_duration) {
             return '00:00';
         }
 
         $minutes = floor($this->recording_duration / 60);
         $seconds = $this->recording_duration % 60;
-        
+
         return sprintf('%02d:%02d', $minutes, $seconds);
     }
 }

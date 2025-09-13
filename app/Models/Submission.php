@@ -61,7 +61,7 @@ class Submission extends Model
     {
         $totalQuestions = $this->interview->questions()->count();
         $completedAnswers = $this->answers()->where('status', 'completed')->count();
-        
+
         return $totalQuestions > 0 ? round(($completedAnswers / $totalQuestions) * 100) : 0;
     }
 }
