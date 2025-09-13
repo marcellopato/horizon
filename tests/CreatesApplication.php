@@ -13,13 +13,13 @@ trait CreatesApplication
      */
     public function createApplication()
     {
-            include __DIR__.'/../bootstrap/app.php';
-            /**
-             * The Laravel application instance.
-             *
-             * @var \Illuminate\Foundation\Application $app
-             */
-            $app = app();
+        include __DIR__.'/../bootstrap/app.php';
+        /**
+         * The Laravel application instance.
+         *
+         * @var \Illuminate\Foundation\Application $app
+         */
+        $app = app();
 
         $app->make(Kernel::class)->bootstrap();
 

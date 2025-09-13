@@ -9,19 +9,18 @@ use Tests\TestCase;
  * Unit tests for SubmissionAnswer helpers.
  *
  * @category Tests
- * @package  Unit
+ *
  * @author   Horizon Team <dev@horizon.local>
  * @license  https://opensource.org/licenses/MIT MIT License
+ *
  * @link     https://github.com/marcellopato/horizon
  */
 class SubmissionAnswerModelTest extends TestCase
 {
     /**
      * It should return correct MIME type based on file extension.
-     *
-     * @return void
      */
-    public function testGetVideoMimeTypeFromExtension(): void
+    public function test_get_video_mime_type_from_extension(): void
     {
         $answer = new SubmissionAnswer(['video_path' => 'videos/answer-1.mp4']);
         $this->assertSame('video/mp4', $answer->getVideoMimeType());

@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::table('submissions', function (Blueprint $table) {
             $table->integer('overall_score')->nullable()->after('metadata');
             $table->enum('recommendation', [
-                'strongly_recommend', 
-                'recommend', 
-                'neutral', 
-                'not_recommend', 
-                'strongly_not_recommend'
+                'strongly_recommend',
+                'recommend',
+                'neutral',
+                'not_recommend',
+                'strongly_not_recommend',
             ])->nullable()->after('overall_score');
             $table->text('overall_comments')->nullable()->after('recommendation');
             $table->timestamp('reviewed_at')->nullable()->after('overall_comments');
@@ -34,11 +34,11 @@ return new class extends Migration
         Schema::table('submissions', function (Blueprint $table) {
             $table->dropForeign(['reviewed_by']);
             $table->dropColumn([
-                'overall_score', 
-                'recommendation', 
-                'overall_comments', 
-                'reviewed_at', 
-                'reviewed_by'
+                'overall_score',
+                'recommendation',
+                'overall_comments',
+                'reviewed_at',
+                'reviewed_by',
             ]);
         });
     }

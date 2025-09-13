@@ -14,15 +14,32 @@
                         <h3 class="text-lg font-semibold mb-4">{{ __('Interview Management') }}</h3>
                         <p class="text-gray-600 mb-4">{{ __('Welcome! You can create and manage interviews here.') }}</p>
                         
+                        @isset($stats)
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-600">{{ __('Total Interviews') }}</p>
+                                    <p class="text-2xl font-bold text-gray-800">{{ $stats['interviews_count'] ?? 0 }}</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-600">{{ __('Pending Reviews') }}</p>
+                                    <p class="text-2xl font-bold text-yellow-700">{{ $stats['pending_reviews_count'] ?? 0 }}</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-600">{{ __('Reviewed') }}</p>
+                                    <p class="text-2xl font-bold text-green-700">{{ $stats['reviewed_count'] ?? 0 }}</p>
+                                </div>
+                            </div>
+                        @endisset
+                        
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <a href="{{ route('interviews.create') }}" class="bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition-colors">
                                 <h4 class="font-semibold text-blue-800">{{ __('Create Interview') }}</h4>
                                 <p class="text-blue-600 text-sm">{{ __('Set up new video interviews') }}</p>
                             </a>
-                            <div class="bg-green-50 p-4 rounded-lg">
+                            <a href="{{ route('submissions.index') }}" class="bg-green-50 p-4 rounded-lg hover:bg-green-100 transition-colors">
                                 <h4 class="font-semibold text-green-800">{{ __('Review Submissions') }}</h4>
                                 <p class="text-green-600 text-sm">{{ __('Evaluate candidate responses') }}</p>
-                            </div>
+                            </a>
                             <a href="{{ route('interviews.index') }}" class="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition-colors">
                                 <h4 class="font-semibold text-purple-800">{{ __('Manage Interviews') }}</h4>
                                 <p class="text-purple-600 text-sm">{{ __('View and edit existing interviews') }}</p>
