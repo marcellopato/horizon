@@ -30,6 +30,6 @@ class RegistrationTest extends TestCase
         );
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('interviews.index', absolute: false));
     }
 }
