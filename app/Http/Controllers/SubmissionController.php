@@ -8,6 +8,7 @@ use App\Models\Submission;
 use App\Models\SubmissionAnswer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class SubmissionController extends Controller
 {
@@ -97,6 +98,40 @@ class SubmissionController extends Controller
     }
 
     /**
+     * Mark submission as completed by the candidate.
+     */
+    public function submit(Submission $submission, Request $request)
+    {
+        if ($submission->user_id !== Auth::id()) {
+            abort(403, 'Access denied.');
+        }
+
+        // Ensure all questions have a completed answer
+        $totalQuestions = $submission->interview->questions()->count();
+        $completedAnswers = $submission->answers()->where('status', 'completed')->count();
+
+        if ($completedAnswers < $totalQuestions) {
+            $msg = 'You must answer all questions before submitting.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
+        $submission->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+            'total_time_spent' => $submission->answers()->sum('recording_duration') ?? null,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Submission completed']);
+        }
+
+        return redirect()->route('interviews.index')->with('success', 'Interview submitted successfully!');
+    }
+
+    /**
      * Display a listing of submissions for admin/reviewers.
      */
     public function index()
@@ -121,24 +156,46 @@ class SubmissionController extends Controller
     /**
      * Save review for a specific answer.
      */
+    /**
+     * Save review for a specific answer.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function saveReview(Request $request)
     {
-        $request->validate([
-            'answer_id' => 'required|exists:submission_answers,id',
-            'score' => 'required|integer|min:1|max:10',
-            'rating' => 'nullable|in:excellent,good,average,poor',
-            'comments' => 'nullable|string|max:1000',
-        ]);
+        $request->validate(
+            [
+                'answer_id' => 'required|exists:submission_answers,id',
+                'score' => 'required|integer|min:1|max:10',
+                'rating' => ['nullable', Rule::in(['excellent', 'good', 'average', 'poor'])],
+                'comments' => 'nullable|string|max:1000',
+            ]
+        );
 
         $answer = SubmissionAnswer::findOrFail($request->answer_id);
         
-        $answer->update([
-            'score' => $request->score,
-            'rating' => $request->rating,
-            'comments' => $request->comments,
-            'reviewed_at' => now(),
-            'reviewed_by' => Auth::id(),
-        ]);
+        $answer->update(
+            [
+                'score' => $request->score,
+                'rating' => $request->rating,
+                'comments' => $request->comments,
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::id(),
+            ]
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Review saved successfully!',
+                    'answer' => $answer->only([
+                        'id', 'score', 'rating', 'comments', 'reviewed_at', 'reviewed_by',
+                    ]),
+                ]
+            );
+        }
 
         return back()->with('success', 'Review saved successfully!');
     }
@@ -146,25 +203,49 @@ class SubmissionController extends Controller
     /**
      * Save overall review for a submission.
      */
+    /**
+     * Save overall review for a submission.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function saveOverallReview(Request $request)
     {
-        $request->validate([
-            'submission_id' => 'required|exists:submissions,id',
-            'overall_score' => 'required|integer|min:1|max:100',
-            'recommendation' => 'nullable|in:strongly_recommend,recommend,neutral,not_recommend,strongly_not_recommend',
-            'overall_comments' => 'nullable|string|max:2000',
-        ]);
+        $request->validate(
+            [
+                'submission_id' => 'required|exists:submissions,id',
+                'overall_score' => 'required|integer|min:1|max:100',
+                'recommendation' => ['nullable', Rule::in([
+                    'strongly_recommend', 'recommend', 'neutral', 'not_recommend', 'strongly_not_recommend',
+                ])],
+                'overall_comments' => 'nullable|string|max:2000',
+            ]
+        );
 
         $submission = Submission::findOrFail($request->submission_id);
         
-        $submission->update([
-            'overall_score' => $request->overall_score,
-            'recommendation' => $request->recommendation,
-            'overall_comments' => $request->overall_comments,
-            'reviewed_at' => now(),
-            'reviewed_by' => Auth::id(),
-            'status' => 'reviewed',
-        ]);
+        $submission->update(
+            [
+                'overall_score' => $request->overall_score,
+                'recommendation' => $request->recommendation,
+                'overall_comments' => $request->overall_comments,
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::id(),
+                'status' => 'reviewed',
+            ]
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Overall review saved successfully!',
+                    'submission' => $submission->only([
+                        'id', 'overall_score', 'recommendation', 'overall_comments', 'reviewed_at', 'reviewed_by', 'status',
+                    ]),
+                ]
+            );
+        }
 
         return back()->with('success', 'Overall review saved successfully!');
     }
@@ -172,20 +253,29 @@ class SubmissionController extends Controller
     /**
      * Remove the specified submission.
      */
+    /**
+     * Remove the specified submission.
+     *
+     * @param Submission $submission
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(Submission $submission)
     {
         // Delete associated files
         foreach ($submission->answers as $answer) {
-            if ($answer->video_path && Storage::disk('public')->exists($answer->video_path)) {
-                Storage::disk('public')->delete($answer->video_path);
+            $path = $answer->video_path;
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
             }
         }
         
         $submission->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Submission deleted successfully'
-        ]);
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'Submission deleted successfully',
+            ]
+        );
     }
 }

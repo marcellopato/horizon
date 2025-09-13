@@ -114,7 +114,7 @@
                             
                             @if($currentAnswer->hasVideo())
                                 <video controls class="w-full mb-6 rounded-lg" style="max-height: 400px;">
-                                    <source src="{{ $currentAnswer->getVideoUrl() }}" type="video/mp4">
+                                    <source src="{{ $currentAnswer->getVideoUrl() }}" type="{{ $currentAnswer->getVideoMimeType() }}">
                                     Your browser does not support the video tag.
                                 </video>
                             @endif
@@ -204,15 +204,15 @@
                                 </div>
                             </div>
                             
-                            <div class="upload-progress hidden mt-4 flex flex-col items-center justify-center">
-                                <div class="w-full max-w-xs bg-gray-200 rounded-full h-2">
-                                    <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium shadow-sm">
-                                        <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                                        Enviando sua resposta...
-                                    </span>
+                            <!-- Fullscreen upload overlay -->
+                            <div class="upload-progress hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm items-center justify-center">
+                                <div class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6 text-center">
+                                    <div class="mx-auto w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
+                                    <h3 class="mt-4 text-lg font-semibold text-gray-900">Enviando sua resposta…</h3>
+                                    <p class="mt-1 text-sm text-gray-600">Isso pode levar alguns segundos. Não feche esta janela.</p>
+                                    <div class="mt-4 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                        <div class="progress-bar bg-blue-500 h-2 w-1/3 animate-pulse"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -246,15 +246,42 @@ class InterviewRecorder {
     
     async setupCamera() {
         try {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 1280, height: 720 },
-                audio: true
-            });
-            
+            if (!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices)) {
+                alert('Seu navegador não suporta captura de câmera/microfone (getUserMedia). Tente atualizar o navegador.');
+                return;
+            }
+
+            // Alerta sobre contexto seguro
+            const isLocalhost = [/^localhost$/i, /^127\.0\.0\.1$/, /^\[::1\]$/].some(rx => rx.test(location.hostname));
+            if (!window.isSecureContext && !isLocalhost) {
+                console.warn('Insecure context detected. getUserMedia requer HTTPS (exceto em localhost).');
+                alert('Para usar câmera e microfone, acesse por HTTPS ou use localhost. Ex.: https://horizon.test ou http://localhost.');
+            }
+
+            // Constraints mais permissivas com valores ideais (não obrigatórios)
+            const preferredConstraints = {
+                video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+                audio: { echoCancellation: true, noiseSuppression: true }
+            };
+
+            // Fallback básico
+            const fallbackConstraints = { video: true, audio: true };
+
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia(preferredConstraints);
+            } catch (err1) {
+                console.warn('Preferred constraints failed:', err1);
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                } catch (err2) {
+                    this.handleGetUserMediaError(err2);
+                    return;
+                }
+            }
+
             document.getElementById('preview').srcObject = this.stream;
         } catch (error) {
-            console.error('Error accessing camera:', error);
-            alert('Unable to access camera and microphone. Please check your permissions.');
+            this.handleGetUserMediaError(error);
         }
     }
     
@@ -268,9 +295,11 @@ class InterviewRecorder {
     startRecording() {
         this.recordedChunks = [];
         
-        this.mediaRecorder = new MediaRecorder(this.stream, {
-            mimeType: 'video/webm;codecs=vp9'
-        });
+        // Seleciona o melhor tipo suportado pelo navegador
+        const supportedType = this.getSupportedMimeType();
+        const options = supportedType ? { mimeType: supportedType } : undefined;
+        
+        this.mediaRecorder = new MediaRecorder(this.stream, options);
         
         this.mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
@@ -303,6 +332,48 @@ class InterviewRecorder {
         }
     }
     
+    getSupportedMimeType() {
+        const types = [
+            'video/webm;codecs=vp9',
+            'video/webm;codecs=vp8',
+            'video/webm'
+        ];
+        for (const t of types) {
+            if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    handleGetUserMediaError(error) {
+        console.error('getUserMedia error:', error?.name, error?.message || error);
+        let message = 'Não foi possível acessar a câmera e o microfone.';
+        switch (error && error.name) {
+            case 'NotAllowedError':
+            case 'SecurityError':
+                message += '\n\nPermissão negada. Verifique:' +
+                    '\n• Permissão do navegador (cadeado na barra de endereços).' +
+                    '\n• Configurações do Windows: Configurações > Privacidade > Câmera/Microfone (habilitar para o navegador).';
+                break;
+            case 'NotFoundError':
+            case 'DevicesNotFoundError':
+                message += '\n\nNenhum dispositivo de câmera/microfone foi encontrado.';
+                break;
+            case 'OverconstrainedError':
+            case 'ConstraintNotSatisfiedError':
+                message += '\n\nAs configurações de resolução/áudio solicitadas não são suportadas. Tente novamente.';
+                break;
+            case 'AbortError':
+            case 'NotReadableError':
+                message += '\n\nOutro aplicativo pode estar usando a câmera/microfone. Feche Zoom/Teams/OBS/etc. e tente novamente.';
+                break;
+            default:
+                message += '\n\nVerifique se está usando HTTPS ou localhost e tente novamente.';
+        }
+        alert(message);
+    }
+
     showRecordedVideo() {
         const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
@@ -338,8 +409,10 @@ class InterviewRecorder {
         formData.append('question_id', {{ $currentQuestionId }});
         formData.append('duration', duration);
         
-        // Show upload progress
-        document.querySelector('.upload-progress').classList.remove('hidden');
+    // Show upload progress overlay
+    const overlay = document.querySelector('.upload-progress');
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
         
         try {
             const response = await fetch('{{ route("submissions.upload-video") }}', {
@@ -362,7 +435,8 @@ class InterviewRecorder {
             console.error('Upload error:', error);
             alert('Upload failed. Please try again.');
         } finally {
-            document.querySelector('.upload-progress').classList.add('hidden');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
         }
     }
     
@@ -416,7 +490,10 @@ class InterviewRecorder {
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new InterviewRecorder();
+    // Só inicializa se a interface de gravação existir nesta página
+    if (document.getElementById('preview') && document.getElementById('start-btn')) {
+        new InterviewRecorder();
+    }
 });
 
 // Helper functions
@@ -430,8 +507,18 @@ function nextQuestion() {
     } else {
         // Interview completed
         if (confirm('You have completed all questions. Submit your interview?')) {
-            // TODO: Submit interview
-            window.location.href = '{{ route('interviews.index') }}';
+            // Finaliza a submissão via POST
+            fetch(`{{ route('submissions.submit', $submission) }}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).then(r => r.json()).then(() => {
+                // Redireciona para uma página acessível ao candidato
+                window.location.href = '{{ route('interviews.index') }}';
+            }).catch(() => {
+                window.location.href = '{{ route('interviews.index') }}';
+            });
         }
     }
 }

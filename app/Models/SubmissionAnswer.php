@@ -44,17 +44,36 @@ class SubmissionAnswer extends Model
 
     public function hasVideo(): bool
     {
-        return !empty($this->video_path) && Storage::exists($this->video_path);
+        return !empty($this->video_path)
+            && Storage::disk('public')->exists($this->video_path);
     }
 
     public function getVideoUrl(): ?string
     {
-        return $this->hasVideo() ? Storage::url($this->video_path) : null;
+        if (!$this->hasVideo()) {
+            return null;
+        }
+        // Public disk is linked to /storage via storage:link
+        return asset('storage/'.ltrim($this->video_path, '/'));
     }
 
     public function getVideoSize(): ?int
     {
-        return $this->hasVideo() ? Storage::size($this->video_path) : null;
+        return $this->hasVideo()
+            ? Storage::disk('public')->size($this->video_path)
+            : null;
+    }
+
+    public function getVideoMimeType(): string
+    {
+        $path = strtolower((string) $this->video_path);
+        if (str_ends_with($path, '.mp4')) {
+            return 'video/mp4';
+        }
+        if (str_ends_with($path, '.webm')) {
+            return 'video/webm';
+        }
+        return 'video/webm';
     }
 
     public function isCompleted(): bool

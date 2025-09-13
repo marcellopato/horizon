@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function () {
         ->name('submissions.start');
     Route::get('submissions/{submission}/interview', [SubmissionController::class, 'interview'])
         ->name('submissions.interview');
+    Route::post('submissions/{submission}/submit', [SubmissionController::class, 'submit'])
+        ->name('submissions.submit');
     Route::get('submissions/{submission}/review', [SubmissionController::class, 'review'])
         ->name('submissions.review')
         ->middleware('can:manage-interviews');
