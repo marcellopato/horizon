@@ -21,6 +21,8 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     *
+     * @param  LoginRequest  $request  Login request object
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -28,11 +30,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('interviews.index', absolute: false));
     }
 
     /**
      * Destroy an authenticated session.
+     *
+     * @param  Request  $request  HTTP request
      */
     public function destroy(Request $request): RedirectResponse
     {

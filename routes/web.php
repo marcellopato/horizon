@@ -1,43 +1,42 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/login');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Dashboard suppressed: no dedicated dashboard route.
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     // Interview routes
     Route::get('interviews', [InterviewController::class, 'index'])->name('interviews.index');
-    
+
     // Protected interview management routes (must come before {interview} routes)
     Route::middleware('manage-interviews')->group(function () {
         Route::get('interviews/create', [InterviewController::class, 'create'])->name('interviews.create');
-        Route::post('interviews', [InterviewController::class, 'store'])->name('interviews.store');
+        Route::post('interviews', [InterviewController::class, 'store'])
+            ->name('interviews.store');
         Route::get('interviews/{interview}/edit', [InterviewController::class, 'edit'])->name('interviews.edit');
         Route::put('interviews/{interview}', [InterviewController::class, 'update'])->name('interviews.update');
         Route::delete('interviews/{interview}', [InterviewController::class, 'destroy'])->name('interviews.destroy');
     });
-    
+
     // Dynamic routes (must come after static routes)
-    Route::get('interviews/{interview}', [InterviewController::class, 'show'])->name('interviews.show');
-    
+    Route::get('interviews/{interview}', [InterviewController::class, 'show'])
+        ->name('interviews.show');
+
     // Interview start page
-    Route::get('interviews/{interview}/start', function(\App\Models\Interview $interview) {
+    Route::get('interviews/{interview}/start', function (\App\Models\Interview $interview) {
         return view('interviews.start', compact('interview'));
-    })->name('interviews.start');
-    
+    })
+        ->name('interviews.start');
+
     // Submission routes
     Route::get('submissions', [SubmissionController::class, 'index'])
         ->name('submissions.index')

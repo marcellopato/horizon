@@ -10,9 +10,10 @@ use Tests\TestCase;
  * Feature tests for Interview CRUD operations.
  *
  * @category Tests
- * @package  Feature
+ *
  * @author   Horizon
  * @license  MIT License
+ *
  * @link     https://github.com/marcellopato/horizon
  */
 class InterviewCrudTest extends TestCase
@@ -21,10 +22,8 @@ class InterviewCrudTest extends TestCase
 
     /**
      * Reviewer should be able to create an interview with questions.
-     *
-     * @return void
      */
-    public function testReviewerCanCreateInterviewWithQuestions(): void
+    public function test_reviewer_can_create_interview_with_questions(): void
     {
         $user = User::factory()->create(['role' => 'reviewer']);
 

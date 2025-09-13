@@ -7,33 +7,29 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
-            // Run only on MySQL/MariaDB (SQLite tests skip).
+        // Run only on MySQL/MariaDB (SQLite tests skip).
         $driver = DB::getDriverName();
-        if (!in_array($driver, ['mysql', 'mariadb'], true)) {
+        if (! in_array($driver, ['mysql', 'mariadb'], true)) {
             return;
         }
 
         DB::statement(
-            "ALTER TABLE `submissions` MODIFY `status` " .
-            "ENUM('in_progress','completed','submitted','reviewed') " .
+            'ALTER TABLE `submissions` MODIFY `status` '.
+            "ENUM('in_progress','completed','submitted','reviewed') ".
             "NOT NULL DEFAULT 'in_progress'"
         );
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {
         $driver = DB::getDriverName();
-        if (!in_array($driver, ['mysql', 'mariadb'], true)) {
+        if (! in_array($driver, ['mysql', 'mariadb'], true)) {
             return;
         }
 
@@ -43,8 +39,8 @@ return new class extends Migration
             ->update(['status' => 'completed']);
 
         DB::statement(
-            "ALTER TABLE `submissions` MODIFY `status` " .
-            "ENUM('in_progress','completed','submitted') " .
+            'ALTER TABLE `submissions` MODIFY `status` '.
+            "ENUM('in_progress','completed','submitted') ".
             "NOT NULL DEFAULT 'in_progress'"
         );
     }

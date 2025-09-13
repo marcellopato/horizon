@@ -15,7 +15,7 @@ class CanManageInterviews
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->canManageInterviews()) {
+        if (! auth()->check() || ! auth()->user()->canManageInterviews()) {
             abort(403, 'Access denied. Only admins and reviewers can manage interviews.');
         }
 

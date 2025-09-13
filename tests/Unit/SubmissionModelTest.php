@@ -13,9 +13,10 @@ use Tests\TestCase;
  * Unit tests for the Submission model helpers.
  *
  * @category Tests
- * @package  Unit
+ *
  * @author   Horizon Team <dev@horizon.local>
  * @license  https://opensource.org/licenses/MIT MIT License
+ *
  * @link     https://github.com/marcellopato/horizon
  */
 class SubmissionModelTest extends TestCase
@@ -23,10 +24,8 @@ class SubmissionModelTest extends TestCase
     /**
      * It should be considered completed when status is
      * completed, submitted, or reviewed.
-     *
-     * @return void
      */
-    public function testIsCompletedTrueForCompletedSubmittedReviewed(): void
+    public function test_is_completed_true_for_completed_submitted_reviewed(): void
     {
         $submission = new Submission(['status' => 'completed']);
         $this->assertTrue($submission->isCompleted());
@@ -41,10 +40,8 @@ class SubmissionModelTest extends TestCase
     /**
      * It should not be considered completed for in_progress
      * or other statuses.
-     *
-     * @return void
      */
-    public function testIsCompletedFalseForInProgressAndOther(): void
+    public function test_is_completed_false_for_in_progress_and_other(): void
     {
         $submission = new Submission(['status' => 'in_progress']);
         $this->assertFalse($submission->isCompleted());
@@ -56,10 +53,8 @@ class SubmissionModelTest extends TestCase
     /**
      * It should calculate progress percentage based on
      * completed answers over total questions.
-     *
-     * @return void
      */
-    public function testGetProgressPercentageCalculatesCorrectly(): void
+    public function test_get_progress_percentage_calculates_correctly(): void
     {
         $user = User::factory()->create();
 
@@ -78,7 +73,7 @@ class SubmissionModelTest extends TestCase
             Question::create(
                 [
                     'interview_id' => $interview->id,
-                    'question' => 'Q' . $order,
+                    'question' => 'Q'.$order,
                     'order' => $order,
                     'time_limit' => 60,
                 ]
@@ -132,10 +127,8 @@ class SubmissionModelTest extends TestCase
 
     /**
      * It should return zero when there are no questions.
-     *
-     * @return void
      */
-    public function testGetProgressPercentageZeroWhenNoQuestions(): void
+    public function test_get_progress_percentage_zero_when_no_questions(): void
     {
         $user = User::factory()->create();
         $interview = Interview::create(
@@ -159,4 +152,3 @@ class SubmissionModelTest extends TestCase
         $this->assertSame(0, $submission->getProgressPercentage());
     }
 }
-

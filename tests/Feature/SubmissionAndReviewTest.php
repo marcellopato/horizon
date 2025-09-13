@@ -15,9 +15,10 @@ use Tests\TestCase;
  * Feature tests for submission upload and review flows.
  *
  * @category Tests
- * @package  Feature
+ *
  * @author   Horizon
  * @license  MIT License
+ *
  * @link     https://github.com/marcellopato/horizon
  */
 class SubmissionAndReviewTest extends TestCase
@@ -46,7 +47,7 @@ class SubmissionAndReviewTest extends TestCase
         return compact('reviewer', 'candidate', 'interview', 'q1');
     }
 
-    public function testCandidateCanUploadVideoAnswerAndSubmit(): void
+    public function test_candidate_can_upload_video_answer_and_submit(): void
     {
         Storage::fake('public');
         $data = $this->seedInterview();
@@ -94,7 +95,7 @@ class SubmissionAndReviewTest extends TestCase
         $this->assertTrue(in_array($submission->status, ['completed', 'reviewed', 'submitted'], true));
     }
 
-    public function testReviewerCanSaveAnswerReviewAndOverallReview(): void
+    public function test_reviewer_can_save_answer_review_and_overall_review(): void
     {
         $data = $this->seedInterview();
         /** @var \App\Models\User $reviewer */

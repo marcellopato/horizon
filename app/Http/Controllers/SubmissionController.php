@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Interview;
 use App\Models\Submission;
 use App\Models\SubmissionAnswer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -19,14 +19,13 @@ class SubmissionController extends Controller
 {
     /**
      * Start an interview for a candidate.
-    *
-    * @param Interview $interview Interview to start
-    *
-    * @return \Illuminate\Http\RedirectResponse
+     *
+     * @param  Interview  $interview  Interview to start
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function start(Interview $interview)
     {
-        if (!$interview->is_active) {
+        if (! $interview->is_active) {
             return redirect()->route('interviews.index')
                 ->with('error', 'This interview is not currently available.');
         }
@@ -59,15 +58,14 @@ class SubmissionController extends Controller
         }
 
         $submission->load(['interview.questions', 'answers']);
-        
+
         return view('submissions.interview', compact('submission'));
     }
 
     /**
      * Upload video answer for a question.
      *
-     * @param Request $request HTTP request
-     *
+     * @param  Request  $request  HTTP request
      * @return \Illuminate\Http\JsonResponse
      */
     public function uploadVideo(Request $request)
@@ -82,7 +80,7 @@ class SubmissionController extends Controller
         );
 
         $submission = Submission::findOrFail($request->submission_id);
-        
+
         if ($submission->user_id !== Auth::id()) {
             abort(403, 'Access denied.');
         }
@@ -123,9 +121,8 @@ class SubmissionController extends Controller
     /**
      * Mark submission as completed by the candidate.
      *
-     * @param Submission $submission Submission
-     * @param Request    $request    HTTP request
-     *
+     * @param  Submission  $submission  Submission
+     * @param  Request  $request  HTTP request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function submit(Submission $submission, Request $request)
@@ -143,6 +140,7 @@ class SubmissionController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
+
             return back()->with('error', $msg);
         }
 
@@ -176,21 +174,19 @@ class SubmissionController extends Controller
     /**
      * Show the review page for a submission.
      *
-     * @param Submission $submission Submission entity
-     *
+     * @param  Submission  $submission  Submission entity
      * @return \Illuminate\View\View
      */
     public function review(Submission $submission)
     {
         $submission->load(['user', 'interview.questions', 'answers']);
-        
+
         return view('submissions.review', compact('submission'));
     }
 
     /**
      * Save review for a specific answer.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function saveReview(Request $request)
@@ -205,7 +201,7 @@ class SubmissionController extends Controller
         );
 
         $answer = SubmissionAnswer::findOrFail($request->answer_id);
-        
+
         $answer->update(
             [
                 'score' => $request->score,
@@ -234,7 +230,6 @@ class SubmissionController extends Controller
     /**
      * Save overall review for a submission.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function saveOverallReview(Request $request)
@@ -251,7 +246,7 @@ class SubmissionController extends Controller
         );
 
         $submission = Submission::findOrFail($request->submission_id);
-        
+
         $submission->update(
             [
                 'overall_score' => $request->overall_score,
@@ -281,7 +276,6 @@ class SubmissionController extends Controller
     /**
      * Remove the specified submission.
      *
-     * @param Submission $submission
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Submission $submission)
@@ -293,7 +287,7 @@ class SubmissionController extends Controller
                 Storage::disk('public')->delete($path);
             }
         }
-        
+
         $submission->delete();
 
         return response()->json(
@@ -307,26 +301,24 @@ class SubmissionController extends Controller
     /**
      * Download all answer videos for a submission as a ZIP file.
      *
-     * @param Submission $submission Submission
-     *
-     * @return StreamedResponse
+     * @param  Submission  $submission  Submission
      */
     public function download(Submission $submission): StreamedResponse
     {
         $submission->loadMissing(['user', 'interview', 'answers']);
 
-        $zipFileName = 'submission-' . $submission->id . '-' . now()->format('Ymd_His') . '.zip';
+        $zipFileName = 'submission-'.$submission->id.'-'.now()->format('Ymd_His').'.zip';
 
         return response()->streamDownload(function () use ($submission) {
-            $zip = new ZipArchive();
+            $zip = new ZipArchive;
             $tmp = tempnam(sys_get_temp_dir(), 'zip');
             $zip->open($tmp, ZipArchive::OVERWRITE);
 
             foreach ($submission->answers as $answer) {
-                if (!$answer->video_path) {
+                if (! $answer->video_path) {
                     continue;
                 }
-                if (!Storage::disk('public')->exists($answer->video_path)) {
+                if (! Storage::disk('public')->exists($answer->video_path)) {
                     continue;
                 }
                 $stream = Storage::disk('public')->readStream($answer->video_path);
@@ -351,17 +343,17 @@ class SubmissionController extends Controller
     /**
      * Download a single answer video file.
      *
-     * @param SubmissionAnswer $answer Answer entity
-     *
+     * @param  SubmissionAnswer  $answer  Answer entity
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function downloadAnswer(SubmissionAnswer $answer)
     {
-        if (!$answer->video_path || !Storage::disk('public')->exists($answer->video_path)) {
+        if (! $answer->video_path || ! Storage::disk('public')->exists($answer->video_path)) {
             abort(404);
         }
 
         $path = Storage::disk('public')->path($answer->video_path);
+
         return response()->download($path, basename($answer->video_path));
     }
 }
