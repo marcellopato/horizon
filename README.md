@@ -15,7 +15,7 @@ All core features have been successfully implemented and tested:
 
 ## 🏗️ Technology Stack
 
-- **Backend:** Laravel 11.x with PHP 8.4
+- **Backend:** Laravel 12.x with PHP 8.2+
 - **Frontend:** TailwindCSS v4 with Vite HMR
 - **Database:** MySQL 8.0
 - **Development:** Docker via Laravel Sail
@@ -50,6 +50,11 @@ All core features have been successfully implemented and tested:
 - **Custom middleware** for role-based route protection
 - **Secure file uploads** with validation
 
+#### Routing & Navigation
+- Raiz ("/") redireciona para "/login".
+- Pós-login: todos os papéis (admin/reviewer/candidate) vão para `interviews.index`.
+- Dashboard foi removido (sem rota/menu dedicados); a navegação aponta para entrevistas e submissões conforme permissões.
+
 ### 🎬 Video Recording System
 - **WebRTC Integration** for browser-based recording
 - **Real-time camera preview** during recording
@@ -82,6 +87,7 @@ All core features have been successfully implemented and tested:
    docker-compose exec laravel.test composer install
    docker-compose exec laravel.test php artisan migrate
    docker-compose exec laravel.test php artisan db:seed
+   docker-compose exec laravel.test php artisan storage:link
    ```
 
 4. **Start the development server:**
@@ -99,9 +105,9 @@ Use these pre-seeded accounts for testing:
 
 | Role | Email | Password | Access Level |
 |------|-------|----------|-------------|
-| **Admin** | admin@horizon.com | password | Full system access |
-| **Reviewer** | reviewer@horizon.com | password | Interview management |
-| **Candidate** | candidate@horizon.com | password | Interview participation |
+| **Admin** | admin@horizon.test | admin123 | Full system access |
+| **Reviewer** | reviewer@horizon.test | reviewer123 | Interview management |
+| **Candidate** | candidate@horizon.test | candidate123 | Interview participation |
 
 ## 🛠️ Development Commands
 
@@ -124,74 +130,74 @@ Resultado recente da suíte de testes (ambiente local dentro do container):
 ```
 # php artisan test
 
-   PASS  Tests\Unit\ExampleTest
-  ✓ that true is true                                                                                                                                     0.17s  
+    PASS  Tests\Unit\ExampleTest
+   ✓ that true is true                                                                                                       0.36s  
 
-   PASS  Tests\Unit\SubmissionAnswerModelTest
-  ✓ get video mime type from extension                                                                                                                   10.08s  
+    PASS  Tests\Unit\SubmissionAnswerModelTest
+   ✓ get video mime type from extension                                                                                     14.99s  
 
-   PASS  Tests\Unit\SubmissionModelTest
-  ✓ is completed true for completed submitted reviewed                                                                                                    0.19s  
-  ✓ is completed false for in progress and other                                                                                                          0.19s  
-  ✓ get progress percentage calculates correctly                                                                                                          1.20s  
-  ✓ get progress percentage zero when no questions                                                                                                        0.25s  
+    PASS  Tests\Unit\SubmissionModelTest
+   ✓ is completed true for completed submitted reviewed                                                                      0.40s  
+   ✓ is completed false for in progress and other                                                                            0.41s  
+   ✓ get progress percentage calculates correctly                                                                            1.90s  
+   ✓ get progress percentage zero when no questions                                                                          0.37s  
 
-   PASS  Tests\Feature\Auth\AuthenticationTest
-  ✓ login screen can be rendered                                                                                                                          2.58s  
-  ✓ users can authenticate using the login screen                                                                                                         0.84s  
-  ✓ users can not authenticate with invalid password                                                                                                      0.62s  
-  ✓ users can logout                                                                                                                                      0.34s  
+    PASS  Tests\Feature\Auth\AuthenticationTest
+   ✓ login screen can be rendered                                                                                            4.20s  
+   ✓ users can authenticate using the login screen                                                                           1.52s  
+   ✓ users can not authenticate with invalid password                                                                        0.81s  
+   ✓ users can logout                                                                                                        0.39s  
 
-   PASS  Tests\Feature\Auth\EmailVerificationTest
-  ✓ email verification screen can be rendered                                                                                                             0.37s  
-  ✓ email can be verified                                                                                                                                 0.37s  
-  ✓ email is not verified with invalid hash                                                                                                               0.37s  
+    PASS  Tests\Feature\Auth\EmailVerificationTest
+   ✓ email verification screen can be rendered                                                                               0.55s  
+   ✓ email can be verified                                                                                                   0.59s  
+   ✓ email is not verified with invalid hash                                                                                 0.67s  
 
-   PASS  Tests\Feature\Auth\PasswordConfirmationTest
-  ✓ confirm password screen can be rendered                                                                                                               0.47s  
-  ✓ password can be confirmed                                                                                                                             0.30s  
-  ✓ password is not confirmed with invalid password                                                                                                       0.57s  
+    PASS  Tests\Feature\Auth\PasswordConfirmationTest
+   ✓ confirm password screen can be rendered                                                                                 0.67s  
+   ✓ password can be confirmed                                                                                               0.42s  
+   ✓ password is not confirmed with invalid password                                                                         0.76s  
 
-   PASS  Tests\Feature\Auth\PasswordResetTest
-  ✓ reset password link screen can be rendered                                                                                                            0.42s  
-  ✓ reset password link can be requested                                                                                                                  1.12s  
-  ✓ reset password screen can be rendered                                                                                                                 0.72s  
-  ✓ password can be reset with valid token                                                                                                                0.63s  
+    PASS  Tests\Feature\Auth\PasswordResetTest
+   ✓ reset password link screen can be rendered                                                                              0.70s  
+   ✓ reset password link can be requested                                                                                    1.70s  
+   ✓ reset password screen can be rendered                                                                                   0.99s  
+   ✓ password can be reset with valid token                                                                                  0.87s  
 
-   PASS  Tests\Feature\Auth\PasswordUpdateTest
-  ✓ password can be updated                                                                                                                               0.21s  
-  ✓ correct password must be provided to update password                                                                                                  0.29s  
+    PASS  Tests\Feature\Auth\PasswordUpdateTest
+   ✓ password can be updated                                                                                                 0.50s  
+   ✓ correct password must be provided to update password                                                                    0.56s  
 
-   PASS  Tests\Feature\Auth\RegistrationTest
-  ✓ registration screen can be rendered                                                                                                                   0.52s  
-  ✓ new users can register                                                                                                                                0.27s  
+    PASS  Tests\Feature\Auth\RegistrationTest
+   ✓ registration screen can be rendered                                                                                     0.94s  
+   ✓ new users can register                                                                                                  0.51s  
 
-   PASS  Tests\Feature\AuthorizationTest
-  ✓ guest is redirected to login                                                                                                                          0.26s  
-  ✓ candidate cannot access manage routes                                                                                                                 0.40s  
-  ✓ reviewer can access manage routes                                                                                                                     0.76s  
-  ✓ admin can access manage routes                                                                                                                        0.62s  
-  ✓ candidate can start and submit but not review                                                                                                         1.24s  
+    PASS  Tests\Feature\AuthorizationTest
+   ✓ guest is redirected to login                                                                                            0.56s  
+   ✓ candidate cannot access manage routes                                                                                   0.81s  
+   ✓ reviewer can access manage routes                                                                                       1.40s  
+   ✓ admin can access manage routes                                                                                          0.88s  
+   ✓ candidate can start and submit but not review                                                                           1.39s  
 
-   PASS  Tests\Feature\ExampleTest
-  ✓ the application returns a successful response                                                                                                         0.40s  
+    PASS  Tests\Feature\ExampleTest
+   ✓ root redirects to login                                                                                                 0.40s  
 
-   PASS  Tests\Feature\InterviewCrudTest
-  ✓ reviewer can create interview with questions                                                                                                          0.29s  
+    PASS  Tests\Feature\InterviewCrudTest
+   ✓ reviewer can create interview with questions                                                                            0.42s  
 
-   PASS  Tests\Feature\ProfileTest
-  ✓ profile page is displayed                                                                                                                             1.26s  
-  ✓ profile information can be updated                                                                                                                    0.48s  
-  ✓ email verification status is unchanged when the email address is unchanged                                                                            0.37s  
-  ✓ user can delete their account                                                                                                                         0.32s  
-  ✓ correct password must be provided to delete account                                                                                                   0.40s  
+    PASS  Tests\Feature\ProfileTest
+   ✓ profile page is displayed                                                                                               1.32s  
+   ✓ profile information can be updated                                                                                      0.53s  
+   ✓ email verification status is unchanged when the email address is unchanged                                              0.43s  
+   ✓ user can delete their account                                                                                           0.39s  
+   ✓ correct password must be provided to delete account                                                                     0.41s  
 
-   PASS  Tests\Feature\SubmissionAndReviewTest
-  ✓ candidate can upload video answer and submit                                                                                                          1.19s  
-  ✓ reviewer can save answer review and overall review                                                                                                    0.44s  
+    PASS  Tests\Feature\SubmissionAndReviewTest
+   ✓ candidate can upload video answer and submit                                                                            1.50s  
+   ✓ reviewer can save answer review and overall review                                                                      0.87s  
 
-  Tests:    38 passed (104 assertions)
-  Duration: 34.58s
+   Tests:    38 passed (105 assertions)
+   Duration: 52.04s
 ```
 
 ### Como rodar os testes
@@ -241,6 +247,15 @@ docker-compose exec laravel.test npm run build
 # Run tests
 docker-compose exec laravel.test php artisan test
 ```
+
+## 📥 Downloads (para Revisores/Admin)
+
+- Baixar todas as respostas de uma submissão (ZIP): `GET /submissions/{submission}/download`
+- Baixar um vídeo específico de uma resposta: `GET /submission-answers/{answer}/download`
+
+Observações:
+- Protegidos por autorização (`can:manage-interviews`), acessíveis a Admin/Reviewer.
+- Arquivos servidos do disco `public` (certifique-se de executar `php artisan storage:link`).
 
 ## 📁 Project Structure
 
@@ -305,4 +320,4 @@ This project is developed as part of a technical assessment and follows standard
 
 **Development Timeline:** 24-hour challenge project
 **Started:** September 12, 2025
-**Current Phase:** Authentication & Security ✅
+**Current Phase:** Maintenance & Cleanup ✅
