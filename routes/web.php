@@ -59,6 +59,13 @@ Route::middleware('auth')->group(function () {
     Route::post('submissions/save-overall-review', [SubmissionController::class, 'saveOverallReview'])
         ->name('submissions.save-overall-review')
         ->middleware('can:manage-interviews');
+    // Downloads
+    Route::get('submissions/{submission}/download', [SubmissionController::class, 'download'])
+        ->name('submissions.download')
+        ->middleware('can:manage-interviews');
+    Route::get('submission-answers/{answer}/download', [SubmissionController::class, 'downloadAnswer'])
+        ->name('submission-answers.download')
+        ->middleware('can:manage-interviews');
     Route::delete('submissions/{submission}', [SubmissionController::class, 'destroy'])
         ->name('submissions.destroy')
         ->middleware('can:manage-interviews');

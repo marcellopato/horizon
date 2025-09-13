@@ -84,11 +84,11 @@
                                                         Review
                                                     </a>
                                                     
-                                                    @if($submission->status === 'completed')
-                                                        <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-3 rounded text-sm" 
-                                                                onclick="downloadSubmission({{ $submission->id }})">
+                                                    @if($submission->isCompleted())
+                                                        <a href="{{ route('submissions.download', $submission) }}"
+                                                           class="bg-gray-700 hover:bg-gray-900 text-white font-bold py-1 px-3 rounded text-sm">
                                                             Download
-                                                        </button>
+                                                        </a>
                                                     @endif
                                                     
                                                     <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm" 
@@ -116,11 +116,6 @@
 </div>
 
 <script>
-function downloadSubmission(submissionId) {
-    // Implement download functionality
-    alert('Download functionality to be implemented');
-}
-
 function deleteSubmission(submissionId) {
     if (confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
         fetch(`/submissions/${submissionId}`, {

@@ -82,6 +82,7 @@
                                             @if($answer->getVideoSize())
                                                 | Size: {{ number_format($answer->getVideoSize() / 1024 / 1024, 2) }} MB
                                             @endif
+                                            | <a href="{{ route('submission-answers.download', $answer) }}" class="text-blue-600 hover:text-blue-800 font-medium">Download video</a>
                                         </div>
                                     </div>
                                 @endif
