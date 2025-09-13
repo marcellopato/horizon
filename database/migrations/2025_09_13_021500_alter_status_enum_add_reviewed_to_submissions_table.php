@@ -12,7 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add 'reviewed' to the ENUM of submissions.status
+            // Run only on MySQL/MariaDB (SQLite tests skip).
+        $driver = DB::getDriverName();
+        if (!in_array($driver, ['mysql', 'mariadb'], true)) {
+            return;
+        }
+
         DB::statement(
             "ALTER TABLE `submissions` MODIFY `status` " .
             "ENUM('in_progress','completed','submitted','reviewed') " .
@@ -27,6 +32,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        $driver = DB::getDriverName();
+        if (!in_array($driver, ['mysql', 'mariadb'], true)) {
+            return;
+        }
+
         // Convert any 'reviewed' back to 'completed' before shrinking the enum
         DB::table('submissions')
             ->where('status', 'reviewed')
